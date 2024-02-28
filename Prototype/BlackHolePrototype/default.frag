@@ -3,11 +3,16 @@
 
 out vec4 FragColour;
 
-// Takes input as colour from .vert shader and returns it.
+// Takes input colour and texture from .vert shader and returns it.
 in vec3 colour;
+in vec2 texCoord;
+
+
+uniform sampler2D tex0;
+
 
 void main(){
 
-	FragColour = vec4(colour, 1.f);
+	FragColour = texture(tex0, texCoord);
 
 }
