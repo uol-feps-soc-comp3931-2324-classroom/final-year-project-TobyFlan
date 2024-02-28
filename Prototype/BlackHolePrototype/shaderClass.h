@@ -23,6 +23,10 @@ public:
 	// Delete the shader program
 	void Delete();
 
+private:
+	// Class to give basic error messages for problems with shader programs
+	void compileErrors(unsigned int shader, const char* type);
+
 };
 
 

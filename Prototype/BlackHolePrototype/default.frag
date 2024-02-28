@@ -3,9 +3,11 @@
 
 out vec4 FragColour;
 
+// Takes input as colour from .vert shader and returns it.
+in vec3 colour;
 
 void main(){
 
-	FragColour = vec4(0.9f, 0.1f, 0.1f, 1.f);
+	FragColour = vec4(colour, 1.f);
 
 }

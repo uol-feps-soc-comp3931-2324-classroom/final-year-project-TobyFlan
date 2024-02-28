@@ -14,14 +14,15 @@
 
 // manually make vertices for rendering a triangle
 GLfloat vertices[] = {
-	-0.5f, -0.5f * float(sqrt(3)) / 3, 0.f, //no z because 2d atm
-	0.5f, -0.5f * float(sqrt(3)) / 3, 0.f,
-	0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.f,
+	//               POSITIONS               //               COLOURS               //
+	-0.5f, -0.5f * float(sqrt(3))     / 3, 0.f,         0.8f,   0.8f,  0.2f,
+	0.5f,  -0.5f * float(sqrt(3))     / 3, 0.f,         0.55f,  0.2f,  0.02f,
+	0.0f,   0.5f * float(sqrt(3)) * 2 / 3, 0.f,         0.321f, 0.01f, 0.4f,
 
 	//vertices for inner triangle
-	-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.f,
-	0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.f,
-	0.f, -0.5f * float(sqrt(3)) / 3, 0.f
+	-0.25f, 0.5f * float(sqrt(3))     / 6, 0.f,         0.2f,   0.2f,  0.32f,
+	0.25f,  0.5f * float(sqrt(3))     / 6, 0.f,         0.08f,  0.08f, 0.12f,
+	0.f,   -0.5f * float(sqrt(3))     / 3, 0.f,         0.38f,  0.28f, 0.23f
 };
 
 // Set index buffer to write order that OpenGL should write vertices in
@@ -84,11 +85,18 @@ int main() {
 	EBO EBO1(indices, sizeof(indices));
 
 	// Link VAO1 to VBO1
-	VAO1.LinkVBO(VBO1, 0);
+	// COORDINATES
+	VAO1.LinkAttributes(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+	// COLOURS
+	VAO1.LinkAttributes(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3*sizeof(float)));
 	// Unbind all Objs
 	VAO1.Unbind();
 	VBO1.Unbind();
 	EBO1.Unbind();
+
+
+	// Get uniforms ready to be sent to .vert shader program
+	GLuint uniformID = glGetUniformLocation(shaderProgram.ID, "scale");
 
 
 
@@ -108,6 +116,10 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		// Tell OpenGL to use this shader program
 		shaderProgram.Activate();
+
+		// Send uniforms to .vert shader
+		glUniform1f(uniformID, -0.5f);
+
 		// Bind the created VAO so OpenGL will use it
 		VAO1.Bind();
 		// Draw triangle using GL_TRIANGLES primitive
