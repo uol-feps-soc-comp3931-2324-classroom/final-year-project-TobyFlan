@@ -6,6 +6,9 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<stb/stb_image.h>
+#include<glm/ext.hpp>
+#include<glm/gtc/matrix_transform.hpp>
+
 
 #include "Texture.h"
 #include "shaderClass.h"
@@ -14,20 +17,30 @@
 #include "EBO.h"
 
 
-// Manually make vertices for rendering a square
-GLfloat vertices[] = {
-	//               POSITIONS               //           COLOURS           //		 TEXTURE MAP		 //
-	            -0.5f, -0.5f, 0.f,                   0.8f,   0.8f,  0.2f,            1.f, 0.f,    // bottom right
-	            0.5f,  -0.5f, 0.f,                   0.55f,  0.2f,  0.02f,           1.f, 1.f,	  // top right
-	            0.5f,   0.5f, 0.f,                   0.321f, 0.01f, 0.4f,            0.f, 1.f,    // top left
-		        -0.5f,  0.5f, 0.f,                   0.11f, 0.11f, 0.14f,            0.f, 0.f,    // bottom left
- 
+// Global constants for window width and height
+const unsigned int width = 800;
+const unsigned int height = 800;
+
+
+// Manually make vertices for rendering a pyramid
+GLfloat vertices[] =
+{ //     COORDINATES     /        COLORS      /   TexCoord  //
+	-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+	-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+	 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+	 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+	 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
 };
 
 // Set index buffer to write order that OpenGL should write vertices in
-GLuint indices[] = {
-	0, 2, 1, // upper triangle of square
-	0, 3, 2  // lower
+GLuint indices[] =
+{
+	0, 1, 2,
+	0, 2, 3,
+	0, 1, 4,
+	1, 2, 4,
+	2, 3, 4,
+	3, 0, 4
 };
 
 int main() {
@@ -48,7 +61,7 @@ int main() {
 
 
 	// Create window
-	GLFWwindow* window = glfwCreateWindow(800, 800, "BlackHolePrototype", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "BlackHolePrototype", NULL, NULL);
 	if (window == NULL) {
 
 		std::cout << "Error: Failed to create GLFW window" << std::endl;
@@ -63,7 +76,7 @@ int main() {
 	gladLoadGL();
 
 	// Specify viewport of OpenGL in the window
-	glViewport(0, 0, 800, 800);
+	glViewport(0, 0, width, height);
 
 	// Generate shader program obj using Vert/Frag shader pipeline
 	Shader shaderProgram("default.vert", "default.frag");
@@ -103,14 +116,13 @@ int main() {
 	Texture tiles("tile_floor.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
 	tiles.textureUnit(shaderProgram, "tex0", 0);
 
+	// Timer for animation
+	float rotation = 0.f;
+	double prevTime = glfwGetTime();
 
 
-	// Background colour of window
-	glClearColor(0.35f, 0.17f, 0.65f, 1.f);
-	// clear back buffer and put this new colour in it
-	glClear(GL_COLOR_BUFFER_BIT);
-	// swap back and front buffers
-	glfwSwapBuffers(window);
+	// Make 3d triangels draw in correct order upon rotation
+	glEnable(GL_DEPTH_TEST);
 
 	//--------------------------------------------------------------------------------------
 	//---------------------------------------MAIN LOOP--------------------------------------
@@ -118,19 +130,58 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 
 		glClearColor(0.35f, 0.17f, 0.65f, 1.f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		// Clear colour buffer and depth buffer to be rewritten next frame swap
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Tell OpenGL to use this shader program
 		shaderProgram.Activate();
 
+
+		// Stuff for 3d ---------------------------------------------------
+		// Animation
+
+		// Simple timer to rotate pyramid
+		double currentTime = glfwGetTime();
+		if (currentTime - prevTime >= 1 / 60) {
+			rotation += 0.5f;
+			prevTime = currentTime;
+		}
+		
+
+		// Initialise matrices for 3d implemenmtation
+		glm::mat4 model = glm::mat4(1.f);
+		glm::mat4 view = glm::mat4(1.f);
+		glm::mat4 projection = glm::mat4(1.f);
+		
+		// Edit model matrix so it does stuff
+		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.f, 1.f, 0.f));
+		// Change view so that the camera is in a point where we can see
+		view = glm::translate(view, glm::vec3(0.0f, -2.5f, -15.f));
+		// Set how data is seen by the camera, with FOV, Aspect ratio, closest sm can be, and farthest sm can be
+		projection = glm::perspective(glm::radians(45.0f), (float)(width / height), 0.1f, 100.0f);
+
+		// Send these matrices into shader program
+		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+		int projectionLoc = glGetUniformLocation(shaderProgram.ID, "projection");
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+
+		// -----------------------------------------------------------------
+
 		// Send uniforms to .vert shader
-		glUniform1f(uniformID, 0.f);
+		glUniform1f(uniformID, 0.5f);
 		// Bind texture object
 		tiles.Bind();
 
 		// Bind the created VAO so OpenGL will use it
 		VAO1.Bind();
 		// Draw triangle using GL_TRIANGLES primitive
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);
 
 		// Tell glfw to process all pooled events

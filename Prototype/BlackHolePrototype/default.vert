@@ -13,9 +13,14 @@ out vec2 texCoord;
 // Recieves a scale modifier for positions of objects
 uniform float scale;
 
+// Import 3d stuff into vert shader
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
 void main(){
 
-	gl_Position = vec4(aPos.x + aPos.x*scale, aPos.y+ aPos.y*scale, aPos.z+ aPos.z*scale, 1.0);
+	gl_Position = projection * view * model * vec4(aPos, 0.1);
 	colour = aColour;
 	texCoord = aTexture;
 
