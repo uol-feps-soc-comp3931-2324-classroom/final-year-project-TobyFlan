@@ -15,6 +15,7 @@
 #include "VAO.h"
 #include "VBO.h"
 #include "EBO.h"
+#include "Camera.h"
 
 
 // Global constants for window width and height
@@ -108,21 +109,18 @@ int main() {
 	EBO1.Unbind();
 
 
-	// Get uniforms ready to be sent to .vert shader program
-	GLuint uniformID = glGetUniformLocation(shaderProgram.ID, "scale");
-
-
 	// Texture stuff
 	Texture tiles("tile_floor.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
 	tiles.textureUnit(shaderProgram, "tex0", 0);
 
-	// Timer for animation
-	float rotation = 0.f;
-	double prevTime = glfwGetTime();
 
 
 	// Make 3d triangels draw in correct order upon rotation
 	glEnable(GL_DEPTH_TEST);
+
+
+	Camera camera(width, height, glm::vec3(0.f, 0.f, 2.f));
+
 
 	//--------------------------------------------------------------------------------------
 	//---------------------------------------MAIN LOOP--------------------------------------
@@ -135,46 +133,13 @@ int main() {
 		// Tell OpenGL to use this shader program
 		shaderProgram.Activate();
 
+		// Recieve inputs for camera
+		camera.Inputs(window);
 
-		// Stuff for 3d ---------------------------------------------------
-		// Animation
-
-		// Simple timer to rotate pyramid
-		double currentTime = glfwGetTime();
-		if (currentTime - prevTime >= 1 / 60) {
-			rotation += 0.5f;
-			prevTime = currentTime;
-		}
-		
-
-		// Initialise matrices for 3d implemenmtation
-		glm::mat4 model = glm::mat4(1.f);
-		glm::mat4 view = glm::mat4(1.f);
-		glm::mat4 projection = glm::mat4(1.f);
-		
-		// Edit model matrix so it does stuff
-		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.f, 1.f, 0.f));
-		// Change view so that the camera is in a point where we can see
-		view = glm::translate(view, glm::vec3(0.0f, -2.5f, -15.f));
-		// Set how data is seen by the camera, with FOV, Aspect ratio, closest sm can be, and farthest sm can be
-		projection = glm::perspective(glm::radians(45.0f), (float)(width / height), 0.1f, 100.0f);
-
-		// Send these matrices into shader program
-		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-		int projectionLoc = glGetUniformLocation(shaderProgram.ID, "projection");
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		// Calculate view matrices and send them to shader file
+		camera.Matrix(45.f, 0.1f, 100.f, shaderProgram, "camMatrix");
 
 
-
-		// -----------------------------------------------------------------
-
-		// Send uniforms to .vert shader
-		glUniform1f(uniformID, 0.5f);
 		// Bind texture object
 		tiles.Bind();
 

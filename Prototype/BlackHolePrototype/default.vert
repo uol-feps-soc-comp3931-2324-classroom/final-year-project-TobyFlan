@@ -10,18 +10,15 @@ layout (location = 2 ) in vec2 aTexture;
 out vec3 colour;
 out vec2 texCoord;
 
-// Recieves a scale modifier for positions of objects
-uniform float scale;
-
-// Import 3d stuff into vert shader
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 camMatrix;
 
 void main(){
 
-	gl_Position = projection * view * model * vec4(aPos, 0.1);
+	// Returns coords of all vertices
+	gl_Position = camMatrix * vec4(aPos, 0.1);
+	// Assigns colours to the vertices
 	colour = aColour;
+	// Assignes texture coords to the vertices
 	texCoord = aTexture;
 
 }
