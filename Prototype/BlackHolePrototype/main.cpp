@@ -2,20 +2,7 @@
 // base surrounding code for opengl project based off of
 // tutorial by Victor Gordan on youtube "OpenGL Tutorial"
 
-#include<iostream>
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
-#include<stb/stb_image.h>
-#include<glm/ext.hpp>
-#include<glm/gtc/matrix_transform.hpp>
-
-
-#include "Texture.h"
-#include "shaderClass.h"
-#include "VAO.h"
-#include "VBO.h"
-#include "EBO.h"
-#include "Camera.h"
+#include"Mesh.h"
 
 
 // Global constants for window width and height
@@ -24,24 +11,47 @@ const unsigned int height = 800;
 
 
 // Manually make vertices for rendering a pyramid
-GLfloat vertices[] =
-{ //     COORDINATES     /        COLORS      /   TexCoord  //
-	-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-	-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-	 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-	 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-	 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
+Vertex vertices[] =
+{ //               COORDINATES           /            COLORS          /           NORMALS         /       TEXTURE COORDINATES    //
+	Vertex{glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
+	Vertex{glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)},
+	Vertex{glm::vec3(1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
+	Vertex{glm::vec3(1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)}
 };
 
 // Set index buffer to write order that OpenGL should write vertices in
 GLuint indices[] =
 {
 	0, 1, 2,
+	0, 2, 3
+};
+
+Vertex lightVertices[] =
+{ //     COORDINATES     //
+	Vertex{glm::vec3(-0.1f, -0.1f,  0.1f)},
+	Vertex{glm::vec3(-0.1f, -0.1f, -0.1f)},
+	Vertex{glm::vec3(0.1f, -0.1f, -0.1f)},
+	Vertex{glm::vec3(0.1f, -0.1f,  0.1f)},
+	Vertex{glm::vec3(-0.1f,  0.1f,  0.1f)},
+	Vertex{glm::vec3(-0.1f,  0.1f, -0.1f)},
+	Vertex{glm::vec3(0.1f,  0.1f, -0.1f)},
+	Vertex{glm::vec3(0.1f,  0.1f,  0.1f)}
+};
+
+GLuint lightIndices[] =
+{
+	0, 1, 2,
 	0, 2, 3,
-	0, 1, 4,
-	1, 2, 4,
-	2, 3, 4,
-	3, 0, 4
+	0, 4, 7,
+	0, 7, 3,
+	3, 7, 6,
+	3, 6, 2,
+	2, 6, 5,
+	2, 5, 1,
+	1, 5, 4,
+	1, 4, 0,
+	4, 5, 6,
+	4, 6, 7
 };
 
 int main() {
@@ -57,15 +67,12 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
-
-
-
-
 	// Create window
 	GLFWwindow* window = glfwCreateWindow(width, height, "BlackHolePrototype", NULL, NULL);
 	if (window == NULL) {
 
 		std::cout << "Error: Failed to create GLFW window" << std::endl;
+		glfwTerminate();
 		return -1;
 
 	}
@@ -79,6 +86,13 @@ int main() {
 	// Specify viewport of OpenGL in the window
 	glViewport(0, 0, width, height);
 
+	Texture textures[]{
+
+		// Texture stuff
+		Texture("tile_floor.jpg", "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE),
+
+	};
+
 	// Generate shader program obj using Vert/Frag shader pipeline
 	Shader shaderProgram("default.vert", "default.frag");
 
@@ -87,31 +101,44 @@ int main() {
 	//---------------------------------------VBOS and stuff---------------------------------
 	//--------------------------------------------------------------------------------------
 
-	// Generate VAO object and bind it
-	VAO VAO1;
-	VAO1.Bind();
+	// Store mesh data in vectors for the mesh
+	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
+	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
+	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
+	// Create floor mesh
+	Mesh floor(verts, ind, tex);
 
-	// Generate VBO and link to given vertices
-	VBO VBO1(vertices, sizeof(vertices));
-	// Generate EBO and link to given indices
-	EBO EBO1(indices, sizeof(indices));
-
-	// Link VAO1 to VBO1
-	// COORDINATES
-	VAO1.LinkAttributes(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-	// COLOURS
-	VAO1.LinkAttributes(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3*sizeof(float)));
-	// TEXTURES
-	VAO1.LinkAttributes(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	// Unbind all Objs
-	VAO1.Unbind();
-	VBO1.Unbind();
-	EBO1.Unbind();
+	// Shader for light cube
+	Shader lightShader("light.vert", "light.frag");
+	// Store mesh data in vectors for the mesh
+	std::vector <Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
+	std::vector <GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
+	// Create light mesh
+	Mesh light(lightVerts, lightInd, tex);
 
 
-	// Texture stuff
-	Texture tiles("tile_floor.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
-	tiles.textureUnit(shaderProgram, "tex0", 0);
+
+	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
+	glm::mat4 lightModel = glm::mat4(1.0f);
+	lightModel = glm::translate(lightModel, lightPos);
+
+	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::mat4 objectModel = glm::mat4(1.0f);
+	objectModel = glm::translate(objectModel, objectPos);
+
+
+	lightShader.Activate();
+	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColour"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+	shaderProgram.Activate();
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(objectModel));
+	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+
+
+
+
 
 
 
@@ -122,33 +149,56 @@ int main() {
 	Camera camera(width, height, glm::vec3(0.f, 0.f, 2.f));
 
 
+	// FPS counter
+	double prevTime = 0.0;
+	double currentTime = 0.0;
+	double timeDiff;
+	unsigned int counter = 0;
+
+
+
 	//--------------------------------------------------------------------------------------
 	//---------------------------------------MAIN LOOP--------------------------------------
 	//--------------------------------------------------------------------------------------
 	while (!glfwWindowShouldClose(window)) {
 
+		currentTime = glfwGetTime();
+		// Calculate time per frame
+		timeDiff = currentTime - prevTime;
+		counter++;
+		if (timeDiff >= 1.0 / 30.0) {
+			// Find frames per second
+			std::string FPS = std::to_string((1.0 / timeDiff) * counter);
+
+			// Find time per frame
+			std::string msPerFrame = std::to_string((timeDiff / counter) * 1000);
+
+			// Display FPS counter in window title
+			std::string title = ("Blackhole Ray Tracer // " + FPS + " FPS  /" + msPerFrame + " ms per frame");
+			glfwSetWindowTitle(window, title.c_str());
+			prevTime = currentTime;
+			counter = 0;
+		}
+
 		glClearColor(0.35f, 0.17f, 0.65f, 1.f);
 		// Clear colour buffer and depth buffer to be rewritten next frame swap
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// Tell OpenGL to use this shader program
-		shaderProgram.Activate();
+
 
 		// Recieve inputs for camera
 		camera.Inputs(window);
 
 		// Calculate view matrices and send them to shader file
-		camera.Matrix(45.f, 0.1f, 100.f, shaderProgram, "camMatrix");
+		camera.updateMatrix(45.f, 0.1f, 100.f);
 
 
-		// Bind texture object
-		tiles.Bind();
+		// Draws different meshes
+		floor.Draw(shaderProgram, camera);
+		light.Draw(lightShader, camera);
 
-		// Bind the created VAO so OpenGL will use it
-		VAO1.Bind();
-		// Draw triangle using GL_TRIANGLES primitive
-		glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
+
+		// Swap buffers to change scene
 		glfwSwapBuffers(window);
-
 		// Tell glfw to process all pooled events
 		glfwPollEvents();
 
@@ -160,16 +210,11 @@ int main() {
 	//---------------------------------------CLEANUP----------------------------------------
 	//--------------------------------------------------------------------------------------
 
-	// Delete all array and buffer objects
-	VAO1.Delete();
-	VBO1.Delete();
-	EBO1.Delete();
 
-	// Delete textures
-	tiles.Delete();
 
 	// Delete shader program
 	shaderProgram.Delete();
+	lightShader.Delete();
 
 	// Destroy window
 	glfwDestroyWindow(window);

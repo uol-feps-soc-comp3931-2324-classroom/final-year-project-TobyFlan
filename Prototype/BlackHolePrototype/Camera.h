@@ -20,6 +20,8 @@ public:
 	glm::vec3 Orientation = glm::vec3(0.f, 0.f, -1.f);
 	// Define "up" direction of camera
 	glm::vec3 Up = glm::vec3(0.f, 1.f, 0.f);
+	// Camera matrix
+	glm::mat4 cameraMatrix = glm::mat4(1.f);
 
 	// Bool to help prevent camera jumping when switching on/off rotation
 	bool firstClick = true;
@@ -34,7 +36,8 @@ public:
 	Camera(int width, int height, glm::vec3 position);
 
 	// Matrix function to send view and projection matrices to shader
-	void Matrix(float FOVdeg, float nearPlane, float farPlane, Shader& shader, const char* uniform);
+	void updateMatrix(float FOVdeg, float nearPlane, float farPlane);
+	void Matrix(Shader& shader, const char* uniform);
 
 	// Input handler for camera
 	void Inputs(GLFWwindow* window);

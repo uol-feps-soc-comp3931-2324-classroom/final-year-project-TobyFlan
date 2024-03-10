@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-Texture::Texture(const char* image, GLenum textureType, GLenum slot, GLenum format, GLenum pixelType) {
+Texture::Texture(const char* image, const char* textureType, GLenum slot, GLenum format, GLenum pixelType) {
 
 
 	type = textureType;
@@ -16,27 +16,28 @@ Texture::Texture(const char* image, GLenum textureType, GLenum slot, GLenum form
 	// Tell OpenGL to generate texture object
 	glGenTextures(1, &ID);
 	// Activate texture unit to hold textures for shader files
-	glActiveTexture(slot);
+	glActiveTexture(GL_TEXTURE_2D + slot);
+	unit = slot;
 	// Bind texture type to texture unit
-	glBindTexture(textureType , ID);
+	glBindTexture(GL_TEXTURE_2D, ID);
 
 	// Define how we want our textures to be handled in certain cases
 	// Define how resising is handled
-	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // minimised
-	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // magnified
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // minimised
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // magnified
 	// Define how texture is repeated over a space
-	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_REPEAT); // s is for x axis
-	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_REPEAT); // t is for y axis
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // s is for x axis
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // t is for y axis
 
 	// Finally, load our texture into the texture unit
-	glTexImage2D(textureType, 0, GL_RGBA, imgWidth, imgHeight, 0, format, pixelType, bytes);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, format, pixelType, bytes);
 	// Generate smaller versions of image
-	glGenerateMipmap(textureType);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	// Free memory used by stb load
 	stbi_image_free(bytes);
 	// Unbind texture
-	glBindTexture(textureType, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 
 
@@ -53,13 +54,13 @@ void Texture::textureUnit(Shader& shader, const char* uniform, GLuint unit) {
 
 void Texture::Bind() {
 
-	glBindTexture(type, ID);
+	glBindTexture(GL_TEXTURE_2D, ID);
 
 }
 
 void Texture::Unbind() {
 
-	glBindTexture(type, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
 

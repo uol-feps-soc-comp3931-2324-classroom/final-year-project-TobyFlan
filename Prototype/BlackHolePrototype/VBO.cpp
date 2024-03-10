@@ -1,13 +1,13 @@
 #include "VBO.h"
 
-VBO::VBO(GLfloat* vertices, GLsizeiptr size) {
+VBO::VBO(std::vector <Vertex>& vertices) {
 
 	// Generate buffers for OpenGL to use
 	glGenBuffers(1, &ID);
 	// Bind buffers so OpenGL knows to use them
 	glBindBuffer(GL_ARRAY_BUFFER, ID);
 	// Set data inside of VBO object
-	glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
 }
 
