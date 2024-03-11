@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-Texture::Texture(const char* image, const char* textureType, GLenum slot) {
+Texture::Texture(const char* image, const char* textureType, GLenum slot, GLenum format, GLenum pixelType) {
 
 
 	type = textureType;
@@ -29,19 +29,8 @@ Texture::Texture(const char* image, const char* textureType, GLenum slot) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // s is for x axis
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // t is for y axis
 
-
-	// Check colour channels to identify how to assign texture
-	if (numColourChannels == 4) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
-	}
-	else if (numColourChannels == 3) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
-	}
-	else if (numColourChannels == 1) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bytes);
-	}
-	else throw std::invalid_argument("Error in texture.cpp; invalid number of colour channels\n");
-	
+	// Finally, load our texture into the texture unit
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, format, pixelType, bytes);
 	// Generate smaller versions of image
 	glGenerateMipmap(GL_TEXTURE_2D);
 
