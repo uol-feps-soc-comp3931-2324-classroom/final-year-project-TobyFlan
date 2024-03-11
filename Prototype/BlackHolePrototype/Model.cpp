@@ -91,12 +91,12 @@ void Model::traverseNode(unsigned int nextNode, glm::mat4 matrix) {
 	// Search for whole trans. matrix
 	glm::mat4 matrixNode = glm::mat4(1.f);
 	if (node.find("matrix") != node.end()) {
-		float matrixValues[16];
+		float scaleValues[16];
 		for (unsigned int i = 0; i < node["matrix"].size(); i++) {
-			matrixValues[i] = (node["matrix"][i]);
+			scaleValues[i] = (node["matrix"][i]);
 		}
 
-		matrixNode = glm::make_mat4(matrixValues);
+		matrixNode = glm::make_mat4(scaleValues);
 	}
 
 	// Combine all transformations
