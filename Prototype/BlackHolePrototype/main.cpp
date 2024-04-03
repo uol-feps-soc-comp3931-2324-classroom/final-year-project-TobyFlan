@@ -2,7 +2,10 @@
 // base surrounding code for opengl project based off of
 // tutorial by Victor Gordan on youtube "OpenGL Tutorial"
 
-#include"Mesh.h"
+#include"objLoader.h"
+
+// TEMP CODE TO LIMIT FRAMERATE CUZ MY LAPTOP IS TOO FAST
+#include <Windows.h>
 
 
 // Global constants for window width and height
@@ -117,6 +120,10 @@ int main() {
 	Mesh light(lightVerts, lightInd, tex);
 
 
+	// Load sphere obj file and create mesh for it
+	Mesh sphere = loadOBJ("models/sphere.txt");
+
+
 
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -156,11 +163,22 @@ int main() {
 	unsigned int counter = 0;
 
 
+	// TEMP CODE TO LIMIT FRAMERATE CUZ MY LAPTOP IS TOO FAST
+	const double targetFPS = 60.0;
+	// TEMP CODE TO LIMIT FRAMERATE CUZ MY LAPTOP IS TOO FAST
+	const double frameTime = 1.0 / targetFPS;
+
+	
+
+
 
 	//--------------------------------------------------------------------------------------
 	//---------------------------------------MAIN LOOP--------------------------------------
 	//--------------------------------------------------------------------------------------
 	while (!glfwWindowShouldClose(window)) {
+
+		// TEMP CODE TO LIMIT FRAMERATE CUZ MY LAPTOP IS TOO FAST
+		double frameStartTime = glfwGetTime();
 
 		currentTime = glfwGetTime();
 		// Calculate time per frame
@@ -194,13 +212,25 @@ int main() {
 
 		// Draws different meshes
 		floor.Draw(shaderProgram, camera);
+		sphere.Draw(shaderProgram, camera);
 		light.Draw(lightShader, camera);
+		
 
 
 		// Swap buffers to change scene
 		glfwSwapBuffers(window);
 		// Tell glfw to process all pooled events
 		glfwPollEvents();
+
+		// TEMP CODE TO LIMIT FRAMERATE CUZ MY LAPTOP IS TOO FAST
+		double frameEndTime = glfwGetTime();
+		double frameDuration = frameEndTime - frameStartTime;
+
+		if (frameDuration < frameTime) {
+			double sleep = frameTime - frameDuration;
+			int milliseconds = static_cast<int>(sleep * 1000);
+			Sleep(milliseconds);
+		}
 
 	}
 

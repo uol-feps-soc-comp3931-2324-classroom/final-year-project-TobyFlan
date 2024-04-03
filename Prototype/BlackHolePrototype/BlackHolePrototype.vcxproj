@@ -71,18 +71,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Toby\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Toby\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Admin\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\include;C:\Users\Toby\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Admin\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\lib;C:\Users\Toby\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Toby\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Toby\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Admin\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\include;C:\Users\Toby\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Admin\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\lib;C:\Users\Toby\Code\final-year-project-TobyFlan\Prototype\BlackHolePrototype\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -111,7 +111,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -142,6 +142,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="objLoader.cpp" />
     <ClCompile Include="shaderClass.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="EBO.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="objLoader.h" />
     <ClInclude Include="shaderClass.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VAO.h" />
@@ -165,6 +167,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Pictures\tile_floor.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="models\sphere.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
