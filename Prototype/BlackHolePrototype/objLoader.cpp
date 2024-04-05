@@ -4,7 +4,7 @@
 Mesh loadOBJ(const char* path) {
 
 	// Temp vars
-	std::vector<GLuint> indices;
+	std::vector<GLuint> indices, normInd, texInd;
 	std::vector <glm::vec3> vertices, normals;
 	std::vector <glm::vec2> tex;
 
@@ -64,15 +64,22 @@ Mesh loadOBJ(const char* path) {
 				printf("Error: File faces cannot be read \n");
 				return Mesh(error_vert, indices, error_tex);
 			}
-			indices.push_back((GLuint)vertIndex[0]);
-			indices.push_back((GLuint)vertIndex[1]);
-			indices.push_back((GLuint)vertIndex[2]);
+			indices.push_back((GLuint)vertIndex[0]-1);
+			indices.push_back((GLuint)vertIndex[1]-1);
+			indices.push_back((GLuint)vertIndex[2]-1);
+			normInd.push_back((GLuint)normIndex[0]-1);
+			normInd.push_back((GLuint)normIndex[1]-1);
+			normInd.push_back((GLuint)normIndex[2]-1);
+			texInd.push_back((GLuint)texIndex[0]-1);
+			texInd.push_back((GLuint)texIndex[1]-1);
+			texInd.push_back((GLuint)texIndex[2]-1);
 		}
 
 
 	}
 
 	// TODO; something is darstadly wrong with the indices
+
 
 
 
@@ -85,6 +92,10 @@ Mesh loadOBJ(const char* path) {
 
 	// Combine vertices, indices and textures inot a mesh object
 	Mesh mesh = Mesh(vertexObjs, indices, textures);
+
+
+	// DEBUG PRINT STATEMENTS
+	printf("successfully read in %d vertices and %d normals and %d textures and %d indices \n", vertices.size(), normals.size(), tex.size(), indices.size());
 
 	// Return mesh object for drawing
 	return mesh;
@@ -107,7 +118,7 @@ std::vector<Vertex> assembleVertices
 				positions[i],
 				normals[i],
 				glm::vec3(1.f,1.f,1.f), // Default colour to white
-				tex[i]
+				glm::vec2(0.f, 0.f)
 			}
 		);
 	}
