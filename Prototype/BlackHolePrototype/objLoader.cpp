@@ -67,12 +67,7 @@ Mesh loadOBJ(const char* path) {
 			indices.push_back((GLuint)vertIndex[0]-1);
 			indices.push_back((GLuint)vertIndex[1]-1);
 			indices.push_back((GLuint)vertIndex[2]-1);
-			normInd.push_back((GLuint)normIndex[0]-1);
-			normInd.push_back((GLuint)normIndex[1]-1);
-			normInd.push_back((GLuint)normIndex[2]-1);
-			texInd.push_back((GLuint)texIndex[0]-1);
-			texInd.push_back((GLuint)texIndex[1]-1);
-			texInd.push_back((GLuint)texIndex[2]-1);
+
 		}
 
 
@@ -80,12 +75,17 @@ Mesh loadOBJ(const char* path) {
 
 	// TODO; something is darstadly wrong with the indices
 
+	// Define final output arrays
+	std::vector<glm::vec3>  finalNormals = calculateNormals(vertices, indices);
+
+	// May have to give up reading in normals and compute them upon rendering
+
 
 
 
 	// Now we use data to load it into a Mesh object
 	// Create Vertex array with all data
-	std::vector<Vertex> vertexObjs = assembleVertices(vertices, normals, tex);
+	std::vector<Vertex> vertexObjs = assembleVertices(vertices, finalNormals, tex);
 	
 	// Create empty Texture array as we have no textures to apply
 	std::vector<Texture> textures;
@@ -95,7 +95,7 @@ Mesh loadOBJ(const char* path) {
 
 
 	// DEBUG PRINT STATEMENTS
-	printf("successfully read in %d vertices and %d normals and %d textures and %d indices \n", vertices.size(), normals.size(), tex.size(), indices.size());
+	printf("successfully read in %d vertices and %d normals and %d textures and %d indices \n", vertices.size(), finalNormals.size(), tex.size(), indices.size());
 
 	// Return mesh object for drawing
 	return mesh;
@@ -125,4 +125,32 @@ std::vector<Vertex> assembleVertices
 
 	return vertices;
 
+}
+
+// Calculate normals manually
+std::vector<glm::vec3> calculateNormals(const std::vector<glm::vec3>& vertices, const std::vector<GLuint>& indices) {
+	std::vector<glm::vec3> normals(vertices.size(), glm::vec3(0.0f)); // Initialize all normals to zero vector
+
+	// Step 1: Compute Face Normals
+	for (size_t i = 0; i < indices.size(); i += 3) {
+		GLuint i1 = indices[i];
+		GLuint i2 = indices[i + 1];
+		GLuint i3 = indices[i + 2];
+
+		glm::vec3 edge1 = vertices[i2] - vertices[i1];
+		glm::vec3 edge2 = vertices[i3] - vertices[i1];
+		glm::vec3 faceNormal = glm::cross(edge1, edge2);
+
+		// Step 2: Accumulate Face Normals to Vertices
+		normals[i1] += faceNormal;
+		normals[i2] += faceNormal;
+		normals[i3] += faceNormal;
+	}
+
+	// Step 3: Normalize Vertex Normals
+	for (size_t i = 0; i < normals.size(); ++i) {
+		normals[i] = glm::normalize(normals[i]);
+	}
+
+	return normals;
 }
