@@ -4,7 +4,7 @@
 #include "Mesh.h"
 
 // Returns mesh object of .obj file to be drawn
-Mesh loadOBJ(const char* path);
+Mesh loadOBJ(const char* path, float scale);
 
 // Function to transform vectors into Vertex vector object.
 std::vector<Vertex> assembleVertices
@@ -17,5 +17,7 @@ std::vector<Vertex> assembleVertices
 // Calculate normals manually as loading from .obj is not working
 std::vector<glm::vec3> calculateNormals(const std::vector<glm::vec3>& vertices, const std::vector<GLuint>& indices);
 
+// Function to scale vertices
+void scaleVertices(std::vector<glm::vec3>& vertices, float scale);
 
 #endif

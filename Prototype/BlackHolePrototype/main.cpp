@@ -121,7 +121,7 @@ int main() {
 
 
 	// Load sphere obj file and create mesh for it
-	Mesh sphere = loadOBJ("models/sphere.txt");
+	Mesh sphere = loadOBJ("models/sphere.txt", 20);
 
 
 

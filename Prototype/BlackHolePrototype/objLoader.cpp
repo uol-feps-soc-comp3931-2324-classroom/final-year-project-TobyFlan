@@ -1,7 +1,7 @@
 #include "objLoader.h"
 
 // Return mesh object to be loaded in main.
-Mesh loadOBJ(const char* path) {
+Mesh loadOBJ(const char* path, float scale) {
 
 	// Temp vars
 	std::vector<GLuint> indices, normInd, texInd;
@@ -73,15 +73,12 @@ Mesh loadOBJ(const char* path) {
 
 	}
 
-	// TODO; something is darstadly wrong with the indices
+	// Scale vertices
+	scaleVertices(vertices, scale);
 
-	// Define final output arrays
+
+	// Calcilate updated normals depending on object scaling
 	std::vector<glm::vec3>  finalNormals = calculateNormals(vertices, indices);
-
-	// May have to give up reading in normals and compute them upon rendering
-
-
-
 
 	// Now we use data to load it into a Mesh object
 	// Create Vertex array with all data
@@ -153,4 +150,11 @@ std::vector<glm::vec3> calculateNormals(const std::vector<glm::vec3>& vertices, 
 	}
 
 	return normals;
+}
+
+// Function to scale vertices
+void scaleVertices(std::vector<glm::vec3>& vertices, float scale) {
+	for (int i = 0; i < vertices.size(); i++) {
+		vertices[i] *= scale;
+	}
 }
