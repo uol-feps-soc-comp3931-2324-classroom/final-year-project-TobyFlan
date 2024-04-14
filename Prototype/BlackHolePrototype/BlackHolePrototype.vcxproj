@@ -167,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Pictures\tile_floor.jpg" />
+    <Image Include="milkyway_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="models\sphere.txt" />

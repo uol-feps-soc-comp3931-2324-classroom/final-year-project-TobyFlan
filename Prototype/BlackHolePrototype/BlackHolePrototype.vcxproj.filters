@@ -102,6 +102,9 @@
     <Image Include="..\..\..\..\Pictures\tile_floor.jpg">
       <Filter>Resource Files\Textures</Filter>
     </Image>
+    <Image Include="milkyway_texture.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="models\sphere.txt">

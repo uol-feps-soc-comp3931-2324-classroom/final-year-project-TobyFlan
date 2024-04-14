@@ -93,6 +93,7 @@ int main() {
 
 		// Texture stuff
 		Texture("tile_floor.jpg", "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE),
+		Texture("milkyway_texture.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
 
 	};
 
@@ -213,7 +214,7 @@ int main() {
 		// Draws different meshes
 		floor.Draw(shaderProgram, camera);
 		sphere.Draw(shaderProgram, camera);
-		light.Draw(lightShader, camera);
+		//light.Draw(lightShader, camera);
 		
 
 
