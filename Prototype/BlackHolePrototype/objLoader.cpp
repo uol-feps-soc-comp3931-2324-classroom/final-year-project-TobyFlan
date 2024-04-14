@@ -1,160 +1,90 @@
-#include "objLoader.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <unordered_map>
+#include "objLoader.h" 
 
-// Return mesh object to be loaded in main.
+
 Mesh loadOBJ(const char* path, float scale) {
+    std::vector<glm::vec3> temp_vertices;
+    std::vector<glm::vec2> temp_texCoords;
+    std::vector<glm::vec3> temp_normals;
 
-	// Temp vars
-	std::vector<GLuint> indices, normInd, texInd;
-	std::vector <glm::vec3> vertices, normals;
-	std::vector <glm::vec2> tex;
+    // Default error values for returning empty mesh for error
+    std::vector<Vertex> error_vertices;
+    std::vector<GLuint> error_indices;
+    std::vector<Texture> error_textures; 
 
-	// Temporary vertex object to return errors
-	std::vector<Vertex> error_vert;
-	std::vector<Texture> error_tex;
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        std::cerr << "Cannot open file!" << std::endl;
+        // Return blank mesh to avoid crashes
+        return Mesh(error_vertices, error_indices, error_textures); 
+    }
 
+    std::string line;
+    // Map vertex positions, normals and texUVs with indices to ensure correct ordering
+    std::unordered_map<Vertex, unsigned int, VertexHash> vertexMap;
+    std::vector<unsigned int> indices;
+    std::vector<Vertex> vertices;
 
-	// Attempt to open file
-	FILE* file = fopen(path, "r");
-	if (file == NULL) {
-		// TODO:  Return an empty mesh object upon open faliure to prevent errors
-		printf("File could not be found!");
-		return Mesh(error_vert, indices, error_tex);
-	}
+    // Read in data from obj file
+    while (getline(file, line)) {
+        std::stringstream ss(line);
+        std::string prefix;
+        ss >> prefix;
 
-	// Read file to end
-	while (true){
-		char lineHeader[256];
+        if (prefix == "v") { // POSITIONS
+            glm::vec3 vertex;
+            ss >> vertex.x >> vertex.y >> vertex.z;
+            temp_vertices.push_back(vertex);
+        }
+        else if (prefix == "vt") { // TEXCOORDS
+            glm::vec2 texCoord;
+            ss >> texCoord.x >> texCoord.y;
+            temp_texCoords.push_back(texCoord);
+        }
+        else if (prefix == "vn") { // NORMALS
+            glm::vec3 normal;
+            ss >> normal.x >> normal.y >> normal.z;
+            temp_normals.push_back(normal);
+        }
+        else if (prefix == "f") { // INDICES
+            std::string vertex1, vertex2, vertex3;
+            ss >> vertex1 >> vertex2 >> vertex3;
+            int vertIndices[3], texIndices[3], normIndices[3];
+            sscanf(vertex1.c_str(), "%d/%d/%d", &vertIndices[0], &texIndices[0], &normIndices[0]);
+            sscanf(vertex2.c_str(), "%d/%d/%d", &vertIndices[1], &texIndices[1], &normIndices[1]);
+            sscanf(vertex3.c_str(), "%d/%d/%d", &vertIndices[2], &texIndices[2], &normIndices[2]);
 
-		// Read first word of line
-		int res = fscanf(file, "%s", lineHeader);
-		if (res == EOF) {
-			break;
-		}
+            // Process each vertex of the face
+            for (int i = 0; i < 3; i++) {
+                Vertex v{
+                    temp_vertices[vertIndices[i] - 1] * scale,
+                    temp_normals[normIndices[i] - 1],
+                    // Default colour to white
+                    glm::vec3(1.0f, 1.0f, 1.0f),
+                    temp_texCoords[texIndices[i] - 1]
+                };
 
-		// Parse starting line
-		// If line represents a vertex
-		if (strcmp(lineHeader, "v") == 0) {
-			glm::vec3 vertex;
-			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
-			vertices.push_back(vertex);
-		}
-		// Else if line represents a texture
-		else if (strcmp(lineHeader, "vt") == 0) {
-			glm::vec2 texture;
-			fscanf(file, "%f %f\n", &texture.x, &texture.y);
-			tex.push_back(texture);
-		}
-		// Else if represents a normal
-		else if (strcmp(lineHeader, "vn") == 0) {
-			glm::vec3 normal;
-			fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
-			normals.push_back(normal);
-		}
-		// Part representing indicies.
-		// Is represented as f v/t/n v/t/n v/t/n
-		// for vertex/texture/normal respectively
-		else if (strcmp(lineHeader, "f") == 0) {
-			std::string vert1, vert2, vert3;
-			unsigned int vertIndex[3], texIndex[3], normIndex[3];
-			// OBJ file has all 3 indexed. My code only needs vertex
-			// Index but will take them all anyway for possible use later
-			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertIndex[0], &texIndex[0], &normIndex[0], &vertIndex[1], &texIndex[1], &normIndex[1], &vertIndex[2], &texIndex[2], &normIndex[2]);
-			// Sanity check on successful read
-			if (matches != 9) {
-				printf("Error: File faces cannot be read \n");
-				return Mesh(error_vert, indices, error_tex);
-			}
-			indices.push_back((GLuint)vertIndex[0]-1);
-			indices.push_back((GLuint)vertIndex[1]-1);
-			indices.push_back((GLuint)vertIndex[2]-1);
+                // Check if the vertex is in the map
+                if (vertexMap.count(v) == 0) {
+                    vertices.push_back(v);
+                    unsigned int index = static_cast<unsigned int>(vertices.size() - 1);
+                    vertexMap[v] = index;
+                    indices.push_back(index);
+                }
+                else {
+                    indices.push_back(vertexMap[v]);
+                }
+            }
+        }
+    }
 
-		}
+    // TODO: load the textures
+    std::vector<Texture> textures; 
 
-
-	}
-
-	// Scale vertices
-	scaleVertices(vertices, scale);
-
-
-	// Calcilate updated normals depending on object scaling
-	std::vector<glm::vec3>  finalNormals = calculateNormals(vertices, indices);
-
-	// Now we use data to load it into a Mesh object
-	// Create Vertex array with all data
-	std::vector<Vertex> vertexObjs = assembleVertices(vertices, finalNormals, tex);
-	
-	// Create empty Texture array as we have no textures to apply
-	std::vector<Texture> textures;
-
-	// Combine vertices, indices and textures inot a mesh object
-	Mesh mesh = Mesh(vertexObjs, indices, textures);
-
-
-	// DEBUG PRINT STATEMENTS
-	printf("successfully read in %d vertices and %d normals and %d textures and %d indices \n", vertices.size(), finalNormals.size(), tex.size(), indices.size());
-
-	// Return mesh object for drawing
-	return mesh;
+    // Create mesh from data
+    return Mesh(vertices, indices, textures);
 }
 
-
-// Function to transform vectors into Vertex vector object.
-std::vector<Vertex> assembleVertices
-(
-	std::vector<glm::vec3> positions,
-	std::vector<glm::vec3> normals,
-	std::vector<glm::vec2> tex
-) {
-
-	std::vector<Vertex> vertices;
-
-	for (int i = 0; i < positions.size(); i++) {
-		vertices.push_back(
-			Vertex{
-				positions[i],
-				normals[i],
-				glm::vec3(1.f,1.f,1.f), // Default colour to white
-				glm::vec2(0.f, 0.f)
-			}
-		);
-	}
-
-	return vertices;
-
-}
-
-// Calculate normals manually
-std::vector<glm::vec3> calculateNormals(const std::vector<glm::vec3>& vertices, const std::vector<GLuint>& indices) {
-	std::vector<glm::vec3> normals(vertices.size(), glm::vec3(0.0f)); // Initialize all normals to zero vector
-
-	// Step 1: Compute Face Normals
-	for (size_t i = 0; i < indices.size(); i += 3) {
-		GLuint i1 = indices[i];
-		GLuint i2 = indices[i + 1];
-		GLuint i3 = indices[i + 2];
-
-		glm::vec3 edge1 = vertices[i2] - vertices[i1];
-		glm::vec3 edge2 = vertices[i3] - vertices[i1];
-		glm::vec3 faceNormal = glm::cross(edge1, edge2);
-
-		// Step 2: Accumulate Face Normals to Vertices
-		normals[i1] += faceNormal;
-		normals[i2] += faceNormal;
-		normals[i3] += faceNormal;
-	}
-
-	// Step 3: Normalize Vertex Normals
-	for (size_t i = 0; i < normals.size(); ++i) {
-		normals[i] = glm::normalize(normals[i]);
-	}
-
-	return normals;
-}
-
-// Function to scale vertices
-void scaleVertices(std::vector<glm::vec3>& vertices, float scale) {
-	for (int i = 0; i < vertices.size(); i++) {
-		vertices[i] *= scale;
-	}
-}
