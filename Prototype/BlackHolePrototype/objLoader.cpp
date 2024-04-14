@@ -5,7 +5,7 @@
 #include "objLoader.h" 
 
 
-Mesh loadOBJ(const char* path, float scale) {
+Mesh loadOBJ(const char* path, float scale, std::vector <Texture> tex) {
     std::vector<glm::vec3> temp_vertices;
     std::vector<glm::vec2> temp_texCoords;
     std::vector<glm::vec3> temp_normals;
@@ -82,9 +82,9 @@ Mesh loadOBJ(const char* path, float scale) {
     }
 
     // TODO: load the textures
-    std::vector<Texture> textures; 
+   // std::vector<Texture> textures; 
 
     // Create mesh from data
-    return Mesh(vertices, indices, textures);
+    return Mesh(vertices, indices, tex);
 }
 

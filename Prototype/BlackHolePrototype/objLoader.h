@@ -19,7 +19,7 @@ inline bool operator==(const Vertex& a, const Vertex& b) {
 }
 
 // Returns mesh object of .obj file to be drawn
-Mesh loadOBJ(const char* path, float scale);
+Mesh loadOBJ(const char* path, float scale, std::vector <Texture> tex);
 
 
 #endif

@@ -152,6 +152,11 @@
   <ItemGroup>
     <None Include="default.frag" />
     <None Include="default.vert" />
+    <None Include="HDR_blue_nebulae-1.hdr" />
+    <None Include="HDR_hazy_nebulae.hdr" />
+    <None Include="HDR_multi_nebulae.hdr" />
+    <None Include="HDR_silver_and_gold_nebulae.hdr" />
+    <None Include="HDR_subdued_blue_nebulae.hdr" />
     <None Include="light.frag" />
     <None Include="light.vert" />
   </ItemGroup>
@@ -167,6 +172,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Pictures\tile_floor.jpg" />
+    <Image Include="empty_workshop.jpg" />
     <Image Include="milkyway_texture.jpg" />
   </ItemGroup>
   <ItemGroup>

@@ -93,7 +93,7 @@ int main() {
 
 		// Texture stuff
 		Texture("tile_floor.jpg", "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE),
-		Texture("milkyway_texture.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		Texture("HDR_blue_nebulae-1.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
 
 	};
 
@@ -122,7 +122,7 @@ int main() {
 
 
 	// Load sphere obj file and create mesh for it
-	Mesh sphere = loadOBJ("models/sphere.txt", 20);
+	Mesh sphere = loadOBJ("models/sphere.txt", 20, tex);
 
 
 
@@ -179,7 +179,7 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 
 		// TEMP CODE TO LIMIT FRAMERATE CUZ MY LAPTOP IS TOO FAST
-		double frameStartTime = glfwGetTime();
+		//double frameStartTime = glfwGetTime();
 
 		currentTime = glfwGetTime();
 		// Calculate time per frame
@@ -212,7 +212,7 @@ int main() {
 
 
 		// Draws different meshes
-		floor.Draw(shaderProgram, camera);
+		//floor.Draw(shaderProgram, camera);
 		sphere.Draw(shaderProgram, camera);
 		//light.Draw(lightShader, camera);
 		
@@ -224,14 +224,14 @@ int main() {
 		glfwPollEvents();
 
 		// TEMP CODE TO LIMIT FRAMERATE CUZ MY LAPTOP IS TOO FAST
-		double frameEndTime = glfwGetTime();
+		/*double frameEndTime = glfwGetTime();
 		double frameDuration = frameEndTime - frameStartTime;
 
 		if (frameDuration < frameTime) {
 			double sleep = frameTime - frameDuration;
 			int milliseconds = static_cast<int>(sleep * 1000);
 			Sleep(milliseconds);
-		}
+		}*/
 
 	}
 
