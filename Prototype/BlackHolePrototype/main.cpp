@@ -48,8 +48,14 @@ int main() {
 	Texture textures[]{
 
 		// Texture stuff
-		Texture("tile_floor.jpg", "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE),
 		Texture("empty_workshop.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("HDR_blue_nebulae-1.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("HDR_hazy_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("HDR_multi_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("HDR_silver_and_gold_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("HDR_subdued_blue_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("milkyway_texture.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("tile_floor.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
 
 	};
 
@@ -68,7 +74,7 @@ int main() {
 
 	// Load sphere obj file and create mesh for it
 	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
-	Mesh sphere = loadOBJ("models/sphere.txt", 1000, tex);
+	Mesh sphere = loadOBJ("models/sphere.txt", 20000.f, tex);
 
 
 
@@ -88,10 +94,10 @@ int main() {
 
 	// Estimate sphere radius and center
 	glm::vec3 sphereCenter(0.f, 0.f, 0.f);
-	float sphereRadius = 500.f;
+	//float sphereRadius = 5000000.f;
 
 	glUniform3fv(glGetUniformLocation(shaderProgram.ID, "sphereCenter"), 1, glm::value_ptr(sphereCenter));
-	glUniform1f(glGetUniformLocation(shaderProgram.ID, "sphereRadius"), 500.f);
+	glUniform1f(glGetUniformLocation(shaderProgram.ID, "sphereRadius"), 10000.f);
 
 
 
@@ -105,7 +111,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 
-	Camera camera(width, height, glm::vec3(0.f, 0.f, 2.f));
+	Camera camera(width, height, glm::vec3(0.f, 0.f, 9000.f));
 
 
 	// FPS counter
@@ -159,7 +165,7 @@ int main() {
 		camera.Inputs(window);
 
 		// Calculate view matrices and send them to shader file
-		camera.updateMatrix(45.f, 0.1f, 100000.f);
+		camera.updateMatrix(45.f, 0.1f, 10000000.f);
 		camera.getViewInverse(shaderProgram);
 
 

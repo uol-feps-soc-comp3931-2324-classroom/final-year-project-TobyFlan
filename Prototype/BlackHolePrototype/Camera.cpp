@@ -43,7 +43,7 @@ void Camera::getViewInverse(Shader& shader) {
 
 	glm::mat4 viewInv = glm::inverse(view);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "invViewMatrix"), 1, GL_FALSE, glm::value_ptr(viewInv));
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "invViewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 
 	// Get Position too because the fragment shader needs it
 	glUniform3fv(glGetUniformLocation(shader.ID, "camPos"), 1, glm::value_ptr(Position));
@@ -53,25 +53,25 @@ void Camera::getViewInverse(Shader& shader) {
 void Camera::Inputs(GLFWwindow* window) {
 
 	// Controls for moving left/right/up/down
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		Position += speed * Orientation;
 	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 		Position -= speed * glm::normalize(glm::cross(Orientation, Up));
 	}
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		Position -= speed * Orientation;
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		Position += speed * glm::normalize(glm::cross(Orientation, Up));
 	}
 
 	// Controls for moving up/down
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-		Position += speed * Up;
+		Position -= speed * Up;
 	}
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-		Position -= speed * Up;
+		Position += speed * Up;
 	}
 
 	// Controls for making camera move faster

@@ -14,11 +14,8 @@ layout (location = 3) in vec2 aTex;
 out vec3 crntPos;
 // Outputs the normal for the Fragment Shader
 out vec3 Normal;
-// Outputs the color for the Fragment Shader
-out vec3 color;
-// Outputs the texture coordinates to the Fragment Shader
-out vec2 texCoord;
 
+out float distToBlackHole;
 
 
 // Imports the camera matrix from the main function
@@ -31,12 +28,10 @@ void main()
 {
 	// calculates current position
 	crntPos = vec3(model * vec4(aPos, 1.0f));
+	distToBlackHole = length(crntPos - vec3(0.0, 0.0, 0.0));
 	// Assigns the normal from the Vertex Data to "Normal"
 	Normal = aNormal;
-	// Assigns the colors from the Vertex Data to "color"
-	color = aColor;
-	// Assigns the texture coordinates from the Vertex Data to "texCoord"
-	texCoord = aTex;
+
 	
 	// Outputs the positions/coordinates of all vertices
 	gl_Position = camMatrix * vec4(crntPos, 1.0);
