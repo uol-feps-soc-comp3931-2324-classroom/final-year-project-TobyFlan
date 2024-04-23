@@ -11,6 +11,7 @@ vec3 blackHolePos = vec3(0.0, 0.0, 0.0);
 const float G = 6e-11;  // Reduced gravitational constant for visible effect
 const float blackHoleMass = 1e30;  // Reduced mass for testing
 const float c = 299792458;  // Speed of light in vacuum, m/s
+const float eventHorizon = 8.0;
 
 // Uniforms
 uniform sampler2D diffuse0; // Texture of the sphere
@@ -27,23 +28,40 @@ void swap(float a, float b) {
     b = temp;
 }
 
+
 void main() {
     vec3 rayOrigin = camPos;
     vec3 rayDir = normalize(crntPos - camPos);
     vec3 rayPoint = rayOrigin;
     float traveledDistance = 0.0;
 
+    vec4 returnColor = vec4(0.0, 0.0, 0.0, 0.0);
+
+    // Using integrated schwarzschild metric
+    // Eulders method constant h2
+    float h2 = pow(length(cross(rayOrigin, rayDir)), 2.0);
+
+
     while (traveledDistance < maxDistance) {
-        vec3 toBlackHole = blackHolePos - rayPoint;
-        float distanceToBlackHole = length(toBlackHole);
+
+        float distanceToBlackHole = length(blackHolePos - rayPoint);
         if (distanceToBlackHole > sphereRadius * 10) break;  // Early exit if far away
+        // Dynapic step size that gets smaller when close to black hole
+        float dynamicStepSize = stepSize * clamp(10.0 / distanceToBlackHole, 0.1, 1.0);
 
-        float bendingFactor = G * blackHoleMass / (distanceToBlackHole * distanceToBlackHole * c * c);
-        rayDir += bendingFactor * normalize(toBlackHole);
-        rayDir = normalize(rayDir);
 
-        rayPoint += stepSize * rayDir;
-        traveledDistance += stepSize;
+        rayDir += -1.5 * h2 * rayPoint / pow(pow(distanceToBlackHole, 2.0), 2.5);
+
+        rayPoint += dynamicStepSize * rayDir;
+
+
+        if (distanceToBlackHole < eventHorizon) {
+            FragColor = vec4(0, 0, 0, 1);  // Black hole event horizon
+            return;
+        }
+
+
+        traveledDistance += dynamicStepSize;
 
         vec3 L = sphereCenter - rayPoint;
         float tca = dot(L, rayDir);
@@ -65,12 +83,12 @@ void main() {
                 vec2 hitTexCoords = vec2(0.5 - atan(normal.z, normal.x) / (2.0 * 3.14159265),
                                          0.5 + asin(normal.y) / 3.14159265);
                 vec4 texColor = texture(diffuse0, hitTexCoords);
-                FragColor = texColor;
-               // return;
+                returnColor = texColor;
+               //return;
             }
         }
     }
 
-
+    FragColor = returnColor;
 
 }

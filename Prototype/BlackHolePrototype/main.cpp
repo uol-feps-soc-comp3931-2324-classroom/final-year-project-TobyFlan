@@ -111,7 +111,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 
-	Camera camera(width, height, glm::vec3(0.f, 0.f, 9000.f));
+	Camera camera(width, height, glm::vec3(0.f, 0.f, 300.f));
 
 
 	// FPS counter
