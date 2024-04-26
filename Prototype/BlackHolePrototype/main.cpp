@@ -74,7 +74,7 @@ int main() {
 
 	// Load sphere obj file and create mesh for it
 	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
-	Mesh sphere = loadOBJ("models/sphere.txt", 20000.f, tex);
+	Mesh sphere = loadOBJ("models/sphere.txt", 2000.f, tex);
 
 
 
@@ -97,7 +97,7 @@ int main() {
 	//float sphereRadius = 5000000.f;
 
 	glUniform3fv(glGetUniformLocation(shaderProgram.ID, "sphereCenter"), 1, glm::value_ptr(sphereCenter));
-	glUniform1f(glGetUniformLocation(shaderProgram.ID, "sphereRadius"), 10000.f);
+	glUniform1f(glGetUniformLocation(shaderProgram.ID, "sphereRadius"), 1000.f);
 
 
 
@@ -165,7 +165,7 @@ int main() {
 		camera.Inputs(window);
 
 		// Calculate view matrices and send them to shader file
-		camera.updateMatrix(45.f, 0.1f, 10000000.f);
+		camera.updateMatrix(45.f, 0.1f, 10000.f);
 		camera.getViewInverse(shaderProgram);
 
 
