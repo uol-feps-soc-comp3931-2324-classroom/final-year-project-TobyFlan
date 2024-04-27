@@ -22,7 +22,7 @@ uniform float sphereRadius;
 uniform vec3 camPos; // Camera position in world space
 
 const float stepSize = 10.0; // Step size for ray marching
-const float maxDistance = 10000.0; // Maximum distance to trace the ray (assuming double the sphere radius for safety)
+const float maxDistance = 50000.0; // Maximum distance to trace the ray (assuming double the sphere radius for safety)
 
 void swap(float a, float b) {
     float temp = a;
@@ -44,7 +44,7 @@ void main() {
     float schwarzschildRad = (2 * G * M) / (c * c);
 
     // Im losing my mind but this seems like its a reasonable size.
-    schwarzschildRad = schwarzschildRad  * 160;
+    schwarzschildRad = schwarzschildRad * 500;
 
 
 
@@ -85,13 +85,14 @@ void main() {
                 t0 = max(t0, 0); // Ensure t0 is non-negative
             }
 
-            if (t0 < stepSize) { // Check if intersection is within the current step
-                rayPoint = rayOrigin + (traveledDistance + t0) * rayDir;
+            if (t1 < stepSize) { // Check if intersection is within the current step
+                rayPoint = rayOrigin + (traveledDistance + t1) * rayDir;
                 vec3 normal = normalize(rayPoint - sphereCenter);
                 vec2 hitTexCoords = vec2(0.5 - atan(normal.z, normal.x) / (2.0 * pi),
                                          0.5 + asin(normal.y) / pi);
                 vec4 texColor = texture(diffuse0, hitTexCoords);
                 returnColor = texColor;
+                break;
 
 
             }
