@@ -7,13 +7,22 @@ out vec4 FragColor;
 in vec3 crntPos; // Current position in world space
 
 
+
+// Stuff for grav lensing
 vec3 blackHolePos = vec3(0.0, 0.0, 0.0);
 const float G = 6.674010551359e-11;  // Reduced gravitational constant for visible effect
 const float M = 1e31;  // Reduced mass for testing
 const float c = 299792458;  // Speed of light in vacuum, m/s
+
+// using equation 2GM/c^2
+const float schwarzschildRad = 1500.0 * 5000.0;
 const float eventHorizon = 9.0;
 const float pi = 3.1415926535897932384626;
 
+// Stuff for accretion disc
+const float diskInnerRadius = 10.0;  // inner radius of the accretion disk
+const float diskOuterRadius = 30.0;  // outer radius of the accretion disk
+const float diskThickness = 0.5;     // thickness of the disk
 
 // Uniforms
 uniform sampler2D diffuse0; // Texture of the sphere
@@ -22,7 +31,7 @@ uniform float sphereRadius;
 uniform vec3 camPos; // Camera position in world space
 
 const float stepSize = 10.0; // Step size for ray marching
-const float maxDistance = 50000.0; // Maximum distance to trace the ray (assuming double the sphere radius for safety)
+const float maxDistance = 10000.0; // Maximum distance to trace the ray (assuming double the sphere radius for safety)
 
 void swap(float a, float b) {
     float temp = a;
@@ -32,43 +41,49 @@ void swap(float a, float b) {
 
 
 void main() {
+
     vec3 rayOrigin = camPos;
     vec3 rayDir = normalize(crntPos - camPos);
     vec3 rayPoint = rayOrigin;
     float traveledDistance = 0.0;
-
     vec4 returnColor = vec4(0.0, 0.0, 0.0, 1.0);
 
-        
-    // Calculate schwarzschild radius to render event horizon
-    float schwarzschildRad = (2 * G * M) / (c * c);
-
-    // Im losing my mind but this seems like its a reasonable size.
-    schwarzschildRad = schwarzschildRad * 500;
-
-
+    float h2 = pow(length(cross(rayPoint, rayDir)), 2.0);
 
     while (traveledDistance < maxDistance) {
 
         float distanceToBlackHole = length(blackHolePos - rayPoint) * 1e6; // Convert distance to meters
-        
+        float dist = length(blackHolePos - rayPoint);
+
+
         // Calculate gravitational bending angle
-        float angle = 4.0 * G * M / (distanceToBlackHole * c * c);
+        //float angle = 4.0 * G * M / (distanceToBlackHole * c * c);
 
         // Adjust rayDir based on bending angle
-        vec3 toBlackHoleNormalized = normalize(blackHolePos - rayPoint);
-        rayDir = normalize(rayDir + angle * toBlackHoleNormalized);
+        //vec3 toBlackHoleNormalized = normalize(blackHolePos - rayPoint);
+       // rayDir = normalize(rayDir + angle * toBlackHoleNormalized);
+       rayDir += -1.5 * h2 * rayPoint / pow(pow(dist, 2.0), 2.5);
+
+
 
 
         if (distanceToBlackHole < schwarzschildRad) {
-            FragColor = vec4(0, 0, 0, 1);  // Render black inside event horizon
+            FragColor = returnColor;
         return;
         }
 
-        float dynamicStepSize = stepSize * clamp(1.0 / (0.1 * distanceToBlackHole + 1.0), 0.1, 1.0);
+        float dynamicStepSize = 1.0;
+        vec3 prePoint = rayPoint;
         rayPoint += dynamicStepSize * rayDir;
         traveledDistance += dynamicStepSize;
 
+        // Stuff for accretion disk
+        
+        
+        if (dist > diskInnerRadius && dist < diskOuterRadius && prePoint.y * rayPoint.y < pow(dynamicStepSize, 4.0)) {
+            FragColor = vec4(1);
+            return;
+        }
 
 
         vec3 L = sphereCenter - rayPoint;
