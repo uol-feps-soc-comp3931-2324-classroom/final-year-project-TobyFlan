@@ -20,9 +20,9 @@ const float eventHorizon = 9.0;
 const float pi = 3.1415926535897932384626;
 
 // Stuff for accretion disc
-const float diskInnerRadius = 10.0;  // inner radius of the accretion disk
+const float diskInnerRadius = 8.0;  // inner radius of the accretion disk
 const float diskOuterRadius = 30.0;  // outer radius of the accretion disk
-const float diskThickness = 0.5;     // thickness of the disk
+
 
 // Uniforms
 uniform sampler2D diffuse0; // Texture of the sphere
@@ -55,6 +55,12 @@ void main() {
         float distanceToBlackHole = length(blackHolePos - rayPoint) * 1e6; // Convert distance to meters
         float dist = length(blackHolePos - rayPoint);
 
+        // Return black if too close to the center of black hole
+        if(dist < 7.0){
+            FragColor = returnColor;
+            return;
+        }
+
 
         // Calculate gravitational bending angle
         //float angle = 4.0 * G * M / (distanceToBlackHole * c * c);
@@ -67,21 +73,29 @@ void main() {
 
 
 
-        if (distanceToBlackHole < schwarzschildRad) {
+      /*  if (distanceToBlackHole < schwarzschildRad) {
             FragColor = returnColor;
         return;
-        }
+        }*/
 
-        float dynamicStepSize = 1.0;
+        float dynamicStepSize = max(stepSize * clamp(1.0 / (0.1 * distanceToBlackHole + 1.0), 0.05, 0.5), 0.05);
         vec3 prePoint = rayPoint;
         rayPoint += dynamicStepSize * rayDir;
         traveledDistance += dynamicStepSize;
 
-        // Stuff for accretion disk
-        
-        
-        if (dist > diskInnerRadius && dist < diskOuterRadius && prePoint.y * rayPoint.y < pow(dynamicStepSize, 4.0)) {
-            FragColor = vec4(1);
+
+        // Stuff for accretion disk     
+        if (dist > diskInnerRadius && dist < diskOuterRadius && prePoint.y * rayPoint.y < pow(dynamicStepSize - 1.0, 2.0)) {
+
+            float diskDensity = 1.0 - length(rayPoint / vec3(diskOuterRadius, 1.0, diskOuterRadius));
+            diskDensity *= smoothstep(diskInnerRadius, diskInnerRadius + 1.0, dist);
+            diskDensity *= inversesqrt(dist);
+            float opticalDepth = dynamicStepSize * 50.0 * diskDensity;
+            vec3 shiftVector = 0.6 * cross(normalize(rayPoint), vec3(0.0, 1.0, 0.0));
+            float velocity = dot(rayDir, shiftVector);
+            float dopplerShift = sqrt((1.0 - velocity) / (1.0 + velocity));
+            float gravitationalShift = sqrt((1.0 - 2.0 / dist) / (1.0 - 2.0 / length(camPos)));
+            FragColor = vec4(vec3(1.0, 0.682, 0.365) * dopplerShift * gravitationalShift * opticalDepth, 1.0);
             return;
         }
 
