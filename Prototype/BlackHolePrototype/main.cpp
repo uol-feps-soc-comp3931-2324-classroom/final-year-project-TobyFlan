@@ -48,11 +48,11 @@ int main() {
 	Texture textures[]{
 
 		// Texture stuff
-		//Texture("empty_workshop.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
-		Texture("HDR_blue_nebulae-1.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
-		//Texture("HDR_hazy_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("empty_workshop.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)                  // Used in report
+		//Texture("HDR_blue_nebulae-1.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)              // Used in report
+		Texture("HDR_hazy_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)						// Used in report
 		//Texture("HDR_multi_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
-		//Texture("HDR_silver_and_gold_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		//Texture("HDR_silver_and_gold_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)       // Used in report
 		//Texture("HDR_subdued_blue_nebulae.hdr", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
 		//Texture("milkyway_texture.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
 		//Texture("tile_floor.jpg", "diffuse", 1, GL_RGB, GL_UNSIGNED_BYTE)
